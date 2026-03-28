@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>KVCET AI Assistant</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+display:flex;
+height:100vh;
+background:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),
+url('https://images.unsplash.com/photo-1562774053-701939374585');
+background-size:cover;
+background-position:center;
+}
+
+/* WELCOME SCREEN */
+#welcomeScreen{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:9999;
+}
+
+.welcomeBox{
+background:white;
+padding:40px;
+width:70%;
+max-width:800px;
+border-radius:10px;
+text-align:center;
+}
+
+.welcomeBox ul{
+text-align:left;
+margin-top:20px;
+}
+
+.welcomeBox button{
+margin-top:20px;
+padding:12px 25px;
+border:none;
+background:#4a8af4;
+color:white;
+font-size:16px;
+border-radius:6px;
+cursor:pointer;
+}
+
+/* SIDEBAR */
+#sidebar{
+width:250px;
+background:#202123;
+color:white;
+padding:20px;
+}
+
+.menu button{
+width:100%;
+padding:10px;
+margin:5px 0;
+border:none;
+background:#343541;
+color:white;
+border-radius:5px;
+cursor:pointer;
+}
+
+.menu button:hover{
+background:#444654;
+}
+
+/* CHAT */
+#chat{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+#header{
+background:white;
+padding:15px;
+font-weight:bold;
+border-bottom:1px solid #ddd;
+display:flex;
+justify-content:space-between;
+}
+
+#messages{
+flex:1;
+overflow-y:auto;
+padding:20px;
+position:relative;
+scroll-behavior: smooth; /* Enable smooth scrolling behavior */
+}
+
+.bot{
+background:white;
+padding:12px;
+border-radius:12px;
+margin-bottom:10px;
+max-width:70%;
+position:relative;
+display:flex;
+align-items:flex-start;
+}
+
+/* AI Avatar */
+.bot-avatar{
+width:35px;
+height:35px;
+border-radius:50%;
+background:#4a8af4;
+display:inline-block;
+margin-right:10px;
+animation:bob 1.2s infinite;
+flex-shrink:0;
+}
+
+@keyframes bob{
+0%{transform:translateY(0px)}
+25%{transform:translateY(-3px)}
+50%{transform:translateY(0px)}
+75%{transform:translateY(3px)}
+100%{transform:translateY(0px)}
+}
+
+.bot-content{flex:1;}
+
+.user{
+background:#4a8af4;
+color:white;
+padding:12px;
+border-radius:12px;
+margin-bottom:10px;
+max-width:70%;
+margin-left:auto;
+}
+
+.typing{
+border-right:3px solid black;
+animation:blink 0.8s infinite;
+}
+
+@keyframes blink{
+0%{border-color:transparent}
+50%{border-color:black}
+100%{border-color:transparent}
+}
+
+/* INPUT */
+#input-area{
+display:flex;
+padding:10px;
+background:white;
+}
+
+#userInput{
+flex:1;
+padding:10px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+#sendBtn,#voiceBtn,#newChatBtn{
+padding:10px 15px;
+margin-left:5px;
+border:none;
+border-radius:5px;
+color:white;
+cursor:pointer;
+}
+
+#sendBtn{background:#4a8af4;}
+#voiceBtn{background:#28a745;}
+#newChatBtn{background:#ff9800;}
+</style>
+</head>
+
+<body>
+
+<div id="welcomeScreen">
+<div class="welcomeBox">
+<h1>🏫 Welcome to KVCET AI College Assistant</h1>
+<p>This AI assistant helps students explore information about the college including courses, facilities, admission process, placements, research activities and more.</p>
+
+<h3>Information Available</h3>
+<ul>
+<li>🎓 Courses and Programs</li>
+<li>💰 Tuition Fees</li>
+<li>🏠 Hostel Facilities</li>
+<li>🎉 College Events</li>
+<li>📝 Admission Process</li>
+<li>📈 Placement Opportunities</li>
+<li>🏫 Infrastructure</li>
+<li>🔬 Laboratories</li>
+<li>📚 Library</li>
+<li>🍽 Campus Canteen</li>
+<li>🔎 Research and Innovation</li>
+<li>🏫 Virtual College Tour</li>
+</ul>
+<button onclick="startChat()">Start Chat</button>
+</div>
+</div>
+
+<div id="sidebar">
+<h2>KVCET Bot 🤖</h2>
+<div class="menu">
+<button onclick="ask('courses')">Courses</button>
+<button onclick="ask('fees')">Fees</button>
+<button onclick="ask('hostel')">Hostel</button>
+<button onclick="ask('events')">Events</button>
+<button onclick="ask('admission')">Admission</button>
+<button onclick="ask('placement')">Placement</button>
+<button onclick="ask('infrastructure')">Infrastructure</button>
+<button onclick="ask('labs')">Labs</button>
+<button onclick="ask('library')">Library</button>
+<button onclick="ask('canteen')">Canteen</button>
+<button onclick="ask('research')">Research</button>
+<button onclick="ask('tour')">College Tour</button>
+<button onclick="showHistory()">Chat History</button>
+</div>
+</div>
+
+<div id="chat">
+<div id="header">
+🏫 KVCET AI Assistant
+<button id="newChatBtn" onclick="newChat()">New Chat</button>
+</div>
+
+<div id="messages">
+<div class="bot"><div class="bot-avatar"></div><div class="bot-content">
+👋 Welcome to KVCET AI College Assistant.
+
+You can ask about Courses, Fees, Hostel, Events, Admission, Placement, Infrastructure, Labs, Library, Canteen, Research and College Tour.
+</div></div>
+</div>
+
+<div id="input-area">
+<input id="userInput" placeholder="Ask about courses, fees, facilities...">
+<button id="sendBtn" onclick="send()">Send</button>
+<button id="voiceBtn" onclick="voice()">🎤</button>
+</div>
+</div>
+
+<script>
+const messages=document.getElementById("messages")
+let chatHistory=[]
+
+function startChat(){document.getElementById("welcomeScreen").style.display="none"}
+
+// Auto-scroll function
+function scrollToBottom() {
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function speak(text){
+    window.speechSynthesis.cancel(); // Stop current speech to start new one immediately
+    let speech=new SpeechSynthesisUtterance(text)
+    speech.lang="en-IN"
+    speechSynthesis.speak(speech)
+}
+
+function typeMessage(element,text){
+    let i=0
+    element.innerHTML=""
+    function typing(){
+        if(i<text.length){
+            element.innerHTML+=text.charAt(i);
+            i++;
+            scrollToBottom(); // Scroll down as text is added
+            setTimeout(typing,15)
+        }
+    }
+    typing()
+}
+
+function addUser(text){
+    let msg=document.createElement("div")
+    msg.className="user"
+    msg.innerHTML=text
+    messages.appendChild(msg)
+    chatHistory.push({role:"user",text:text})
+    scrollToBottom();
+}
+
+function addBot(text){
+    let thinking=document.createElement("div")
+    thinking.className="bot"
+    thinking.innerHTML='<div class="bot-avatar"></div><div class="bot-content">🤖 AI is thinking...</div>'
+    messages.appendChild(thinking)
+    scrollToBottom();
+
+    setTimeout(function(){
+        let content=thinking.querySelector(".bot-content")
+        thinking.classList.add("typing")
+        typeMessage(content,text)
+        speak(text)
+        chatHistory.push({role:"bot",text:text})
+    },400) // Reduced delay for faster response
+}
+
+function ask(text){addUser(text);reply(text)}
+function send(){let input=document.getElementById("userInput");let text=input.value;if(text.trim()=="")return;addUser(text);reply(text);input.value=""}
+document.getElementById("userInput").addEventListener("keypress",function(e){if(e.key==="Enter"){send()}})
+
+function newChat(){
+    messages.innerHTML=""
+    addBot(`👋 Welcome to KVCET AI College Assistant.
+
+You can ask about Courses, Fees, Hostel, Events, Admission, Placement, Infrastructure, Labs, Library, Canteen, Research and College Tour.`)
+}
+
+function showHistory(){
+    let historyText="Previous Chat:\n\n"
+    chatHistory.forEach(function(msg){historyText+=msg.role.toUpperCase()+": "+msg.text+"\n\n"})
+    alert(historyText)
+}
+
+function reply(text){
+text=text.toLowerCase()
+if(text.includes("course")){text="courses"}
+else if(text.includes("fee")){text="fees"}
+else if(text.includes("hostel")){text="hostel"}
+else if(text.includes("event")){text="events"}
+else if(text.includes("admission")){text="admission"}
+else if(text.includes("placement")){text="placement"}
+else if(text.includes("infrastructure")){text="infrastructure"}
+else if(text.includes("lab")){text="labs"}
+else if(text.includes("library")){text="library"}
+else if(text.includes("canteen")){text="canteen"}
+else if(text.includes("research")){text="research"}
+else if(text.includes("tour")){text="tour"}
+
+if(text=="courses"){addBot(`🎓 Courses Available
+
+Undergraduate Programs
+• Artificial Intelligence and Data Science (AIDS)
+• Computer Science and Engineering (CSE)
+• Electronics and Communication Engineering (ECE)
+• Electrical and Electronics Engineering (EEE)
+• Mechanical Engineering
+• Civil Engineering
+
+Postgraduate Programs
+• Master of Computer Applications (MCA)
+• Master of Business Administration (MBA)
+
+The curriculum is designed according to university guidelines and industry standards. Students are also encouraged to participate in technical workshops, certification programs, internships, and industrial training programs to enhance their professional skills.`)}
+
+else if(text=="fees"){addBot(`💰 Tuition Fees (Approximate per year)
+
+• AIDS – ₹50,000
+• CSE – ₹45,000
+• ECE – ₹45,000
+• EEE – ₹45,000
+• Mechanical – ₹38,000
+• Civil – ₹38,000
+
+Additional Information
+
+• Hostel fees and transport fees are separate.
+• Scholarships are available for eligible students.
+• Government scholarship schemes and financial assistance programs are also supported by the college administration.`)}
+
+else if(text=="hostel"){addBot(`🏠 Hostel and Food Facilities
+
+The college provides separate hostel facilities for both boys and girls within the campus.
+
+Hostel Features
+• Safe and secure environment
+• 24-hour security
+• Wi-Fi facility
+• Study rooms
+• Clean drinking water
+
+Food Facility
+
+Nutritious food is served in the hostel mess including:
+
+• Breakfast
+• Lunch
+• Evening snacks
+• Dinner
+
+Both vegetarian and non-vegetarian options are available.`)}
+
+else if(text=="events"){addBot(`🎉 College Events
+
+The college organizes various academic and cultural events throughout the year.
+
+Technical Events
+• National and inter-college symposiums
+• Hackathons
+• Technical paper presentations
+• Coding competitions
+
+Cultural Events
+• Annual cultural festival
+• Traditional day celebrations
+• Dance and music competitions
+• Talent shows
+
+These events help students improve creativity, teamwork, leadership, and communication skills.`)}
+
+else if(text=="admission"){addBot(`📝 Admission Process
+
+Step 1
+Fill out the admission application form either online or through the college admission office.
+
+Step 2
+Submit required documents:
+
+• 10th mark sheet
+• 12th mark sheet
+• Transfer Certificate (TC)
+• Community Certificate (if applicable)
+• Passport size photographs
+
+Step 3
+Verification of documents by the admission department.
+
+Step 4
+Payment of admission fees and confirmation of seat.
+
+Students will then receive their official admission confirmation from the college administration.`)}
+
+else if(text=="placement"){addBot(`📈 Placement and Career Development
+
+The college has an active Training and Placement Cell that supports students in preparing for job opportunities.
+
+Placement Training Includes
+• Aptitude training
+• Communication skill development
+• Resume preparation
+• Mock interviews
+• Technical skill training
+
+Recruitment
+
+Many reputed companies visit the campus every year for campus recruitment. Students from various departments get opportunities to attend placement drives, internships, and industry training programs.
+
+The placement cell works closely with industries to improve employability skills among students.`)}
+
+else if(text=="infrastructure"){addBot(`🏫 College Infrastructure
+
+The campus has modern infrastructure designed to support academic excellence and student development.
+
+Facilities include:
+
+• Spacious classrooms
+• Smart boards and digital learning systems
+• Seminar halls
+• Conference halls
+• High-speed internet access
+• Green campus environment
+
+The campus is designed to provide a comfortable learning environment for students and faculty members.`)}
+
+else if(text=="labs"){addBot(`🔬 Laboratory Facilities
+
+Each department has specialized laboratories equipped with modern technology and equipment.
+
+Examples include:
+
+• Computer programming laboratories
+• Electronics and communication labs
+• Electrical circuit laboratories
+• Mechanical engineering workshops
+• Civil engineering material testing labs
+
+Laboratories help students gain practical knowledge, conduct experiments, and develop hands-on technical skills related to their academic subjects.`)}
+
+else if(text=="library"){addBot(`📚 Library
+
+The college library is an important academic resource center for students and faculty members.
+
+Library Resources
+
+• Thousands of academic books
+• National and international journals
+• Technical magazines
+• Research publications
+• Digital learning resources
+
+The library provides a peaceful study environment where students can read, research, and prepare for examinations and projects.`)}
+
+else if(text=="canteen"){addBot(`🍽 Campus Canteen
+
+The college campus includes a hygienic and spacious canteen that serves food for students and staff.
+
+Available Food Items
+
+• Breakfast
+• Lunch meals
+• Evening snacks
+• Tea and coffee
+• Soft drinks and beverages
+
+Food is prepared under hygienic conditions and is available at affordable prices.`)}
+
+else if(text=="research"){addBot(`🔎 Research and Innovation
+
+The college encourages students and faculty members to participate in research and innovation activities.
+
+Research Activities Include:
+
+• Student mini-projects
+• Final year major projects
+• Technical research publications
+• Innovation workshops
+• Industry collaboration programs
+
+Students are motivated to develop innovative solutions and participate in national level technical competitions.`)}
+
+else if(text=="tour"){addBot(`🏫 Virtual College Tour
+
+The campus includes several important facilities:
+
+• Main academic blocks with classrooms
+• Advanced laboratories
+• Central library
+• Hostel buildings
+• Sports playground
+• Seminar halls
+• Student activity centers
+
+The campus environment is green, clean, and spacious, providing a peaceful atmosphere for academic learning and student development.`)}
+
+else{addBot("Please ask about courses, fees, hostel, events, admission, placement, infrastructure, labs, library, canteen, research or college tour.")}
+}
+
+/* VOICE INPUT */
+function voice(){
+let recognition=new webkitSpeechRecognition()
+recognition.lang="en-IN"
+recognition.start()
+recognition.onresult=function(event){
+let text=event.results[0][0].transcript.toLowerCase()
+addUser(text)
+reply(text)
+}
+}
+</script>
+</body>
+</html>
